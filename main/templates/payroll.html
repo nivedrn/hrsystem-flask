@@ -1,0 +1,328 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<div class="container-fluid px-5">
+    <h1 class="mb-4">Manage Payroll</h1>
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#payroll" id="managePayroll"
+                onclick="toggleTab(event, 'Payroll');">Payroll</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#tiers" id="manageTiers" onclick="toggleTab(event, 'Tiers');">Tiers</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#bonus" id="manageBonuses" onclick="toggleTab(event, 'Bonuses');">Allocate Bonus</a>
+        </li>
+    </ul>
+    {% if "messages" in response %}
+    {% if "ERROR" in response["messages"] %}
+    <div class="alert alert-warning mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% else %}
+    <div class="alert alert-success mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div id="Payroll" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="bd-highlight">
+                <div id="PayrollForm" class="PayrollForm">
+                    <div class="card containter-fluid mb-3">
+                        <form
+                            action="/payroll/details/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2 flex-grow-1 ">
+                                        <label for="proll_period">Period</label>
+                                        <input type="month" class="form-control" id="proll_period" name="proll_period"
+                                            value="{{response['formData']['proll_period']}}">
+                                    </div>
+
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="proll_status">Payroll Status</label>
+                                        {% if response['action'] != 'edit' %}
+                                        <input type="text" class="form-control" id="proll_status" name="proll_status"
+                                            value="DRAFT" disabled="true">
+                                        {% else %}
+                                        <input type="text" class="form-control" id="proll_status" name="proll_status"
+                                            value="{{response['formData']['proll_status']}}">
+                                        {% endif %}
+                                    </div>
+                                    <input type="hidden" id="payroll_id" name="payroll_id"
+                                        value="{{response['key']}}" />
+                                    <div class="col-xs-4 ml-4 pt-4">
+                                        <button type="submit" class="btn btn-primary">{{ "Save" if response["action"] ==
+                                            "edit" else "Create" }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if "payrolls" in response and response["payrolls"] != None %}
+        {% if response["payrolls"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">                    
+                    <th scope="col" colspan="3" style="width:20%">Action</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">No. of Payroll Details</th>
+                    <th scope="col">Payroll Details Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["payrolls"] %}
+                <tr>
+                    <td class="text-center"><a href="/payroll/details/edit/{{item.id}}">Edit</a>
+                    </td>
+                    <td class="text-center"><a href="/payroll/details/discard/{{item.id}}">Discard</a>
+                    {% if item.proll_status != "DRAFT" or (item.proll_status == "DETAILS GENERATED" and response["action"] != "read") %}
+                    <td class="text-center"><a href="/payroll/details/read/{{item.id}}">View Details</a>
+                    </td>
+                    {% elif item.proll_status == "DETAILS GENERATED" %}
+                    <td class="text-center"><a href="/payroll/details/invoice/{{item.id}}">Mark as Invoiced</a>
+                    </td>
+                    </td>
+                    {% else %}
+                    <td><a href="/payroll/details/generate/{{item.id}}">Generate Payroll Details</a></td>
+                    {% endif %}
+                    <td>{{item.proll_year}} / {{item.proll_month}}</td>
+                    <td>{{item.proll_status}}</td>
+                    <td>{{item.detailcount}}</td>
+                    <td>{{item.detailtotal}} EUR</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No payrolls found. Generate payroll from above to create payroll details in
+            the
+            system.
+        </p>
+        {% endif %}
+        {% endif %}
+
+        {% if response["key"] != None and response["action"] == "read" and response["table"] == "details" %}
+        
+        {% if "payrollDetails" in response and response["payrollDetails"] != None %}
+        {% if response["payrollDetails"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col" colspan="2" style="width:10%">Action</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["payrollDetails"] %}
+                <tr>
+                    <td class="text-center"><a href="/payroll/details/edit/{{item.id}}"><i
+                                class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                    </td>
+                    <td class="text-center"><a href="/payroll/details/delete/{{item.id}}"><i
+                                class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                    </td>
+                    <td>{{item.proll_year}} / {{item.proll_month}}</td>
+                    <td>{{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}</td>
+                    <td>{{item.prdetail_type}}</td>
+                    <td>{{item.prdetail_status}}</td>
+                    <td>{{item.prdetail_amount}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No payroll details found. Generate payroll details from the payroll list view.
+        </p>
+        {% endif %}
+        {% endif %}
+
+        {% endif %}
+    </div>
+
+    <div id="Tiers" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="pt-2 bd-highlight">
+                <a href="#" id="addTiersButton" onclick="toggleForm('TiersForm');" style="float:right;"><button
+                        class="btn btn-outline-primary btn-sm" type="button">Add
+                        Tiers</button></a>
+            </div>
+            <div class="bd-highlight">
+                <div id="TiersForm" class="TiersForm">
+                    <div class="card containter-fluid mb-3">
+                        <div class="card-header">
+                            {{ response['action']|title if response['action'] != None else 'Add' }} Tiers
+                        </div>
+                        <form
+                            action="/payroll/tiers/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2 flex-grow-1 ">
+                                        <label for="tier_name">Name</label>
+                                        <input type="text" class="form-control" id="tier_name" name="tier_name"
+                                            value="{{response['formData']['tier_name']}}">
+                                    </div>
+                                    <div class="col-xs-4 flex-grow-1 ml-4">
+                                        <label for="tier_payscale">Payscale (Monthly)</label>
+                                        <input type="number" class="form-control" id="tier_payscale"
+                                            name="tier_payscale" value="{{response['formData']['tier_payscale']}}">
+                                    </div>
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="tier_active">Active</label>
+                                        <input type="checkbox" class="form-control" id="tier_active" name="tier_active"
+                                            {{ "checked" if response['formData']["tier_active"] else "" }}>
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-3 flex-grow-1">
+                                        <label for="tier_descr">Description</label>
+                                        <textarea class="form-control" id="tier_descr" name="tier_descr" type="textarea"
+                                            rows="3">{{response['formData']['tier_descr']}}</textarea>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="tier_id" name="tier_id" value="{{response['key']}}" />
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <a href="#" id="cancelTiersButton" onclick="toggleForm('TiersForm');"
+                                    style="float:right;"><button class="btn btn-outline-danger"
+                                        type="button">Cancel</button></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if response["tiers"].rowcount > 0 %}
+
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col" colspan="2" style="width:10%">Action</th>
+                    <th scope="col">Tier Name</th>
+                    <th scope="col">Tier Description</th>
+                    <th scope="col">Payscale (Monthly)</th>
+                    <th scope="col">Is Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["tiers"] %}
+                <tr>
+                    <td class="text-center"><a href="/payroll/tiers/edit/{{item.id}}"><i
+                                class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                    </td>
+                    <td class="text-center"><a href="/payroll/tiers/delete/{{item.id}}"><i
+                                class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                    </td>
+                    <td>{{item.tier_name}}</td>
+                    <td>{{item.tier_descr}}</td>
+                    <td>{{item.tier_payscale}}</td>
+                    <td>{{item.tier_active}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No tiers found. Click on <a href="#" id="addPayrollButton"
+                onclick="toggleForm('TiersForm');">"Add Tier"</a> button to create tiers in the
+            system.
+        </p>
+        {% endif %}
+    </div>
+
+    <div id="Bonuses" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="bd-highlight">
+                <div id="PayrollForm" class="PayrollForm">
+                    <div class="card containter-fluid mb-3">
+                        <form
+                            action="/payroll/bonus/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">                                    
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="person_id">Employee</label>
+                                        <select class="form-control" id="bonus_person_id" name="person_id"
+                                            onfocus="fetchData('persons','#bonus_person_id');">
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="prdetail_amount">Amount</label>
+                                        <input type="number" class="form-control" id="prdetail_amount" name="prdetail_amount"
+                                            value="{{response['formData']['prdetail_amount']}}" required>
+                                    </div>
+                                    <div class="col-xs-4 flex-grow-1 ml-4">
+                                        <label for="prdetail_status">Status</label>
+                                        <select class="form-control" id="prdetail_status" name="prdetail_status">
+                                            <option>CREATED</option>
+                                            <option>APPROVED</option>
+                                            <option>DISCARDED</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4 ml-4 pt-4">
+                                        <button type="submit" class="btn btn-primary">{{ "Save" if response["action"] ==
+                                            "edit" else "Create" }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if "bonuses" in response and response["bonuses"] != None %}
+        {% if response["bonuses"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr>
+                    <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">Allocated Bonuses</span></th>
+                </tr>
+                <tr class="text-center" style="background-color:#D6EAF8">                    
+                    <th scope="col" colspan="2" style="width:20%">Action</th>
+                    <th scope="col">Employee Name</th>
+                    <th scope="col">Bonus Amount</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["bonuses"] %}
+                <tr>
+                    <td class="text-center"><a href="/payroll/bonus/edit/{{item.id}}">Edit</a>
+                    </td>
+                    <td class="text-center"><a href="/payroll/bonus/discard/{{item.id}}">Discard</a>
+                    <td>{{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}</td>
+                    <td>{{item.prdetail_amount}} EUR</td>
+                    <td>{{item.prdetail_status}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No payrolls found. Generate payroll from above to create payroll details in
+            the
+            system.
+        </p>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock content %}

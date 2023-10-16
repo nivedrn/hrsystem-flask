@@ -1,0 +1,96 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container-fluid px-5">
+    <h1 class="mb-4">Vacations</h1>
+    {% if "messages" in response %}
+    {% if "ERROR" in response["messages"] %}
+    <div class="alert alert-warning" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% else %}
+    <div class="alert alert-success" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% endif %}
+    {% endif %}
+    <div id="Vacation">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="bd-highlight">
+                <div id="VacationForm" class="VacationForm">
+                    <div class="card containter-fluid mb-3">
+                        <div class="card-header">
+                            Apply for a leave:
+                        </div>
+                        <form action="/vacation" method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2  flex-grow-1">
+										<label for="salutation">Leave Type</label>
+										<select class="form-control" id="vac_type"
+                                        name="vac_type" value="{{response['formData']['vac_type']}}">
+											<option>Paid Leave</option>
+											<option>Sick Leave</option>
+											<option>Loss of Pay</option>
+										</select>
+									</div>
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="vac_startdate">Start Date</label>
+                                        <input type="date" class="form-control" id="vac_startdate"
+                                            name="vac_startdate" value="{{response['formData']['vac_startdate']}}">
+                                    </div>
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="vac_enddate">End Date</label>
+                                        <input type="date" class="form-control" id="vac_enddate"
+                                            name="vac_enddate" value="{{response['formData']['vac_enddate']}}">
+                                    </div>
+                                </div>
+								<div class="form-group d-flex flex-row justify-content-between mb-2">
+									<div class="col-xs-3 flex-grow-1">
+										<label for="vac_comment">Comment</label>
+										<textarea class="form-control" id="vac_comment" name="vac_comment" type="textarea"
+											rows="3">{{response['formData']['vac_comment']}}</textarea>
+									</div>
+								</div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Apply Leave</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if "leaveHistory" in response and response["leaveHistory"] != None %}
+    {% if response["leaveHistory"].rowcount > 0 %}
+    <table class="table table-sm table-hover table-bordered shadow-smrounded">
+        <thead>
+            <tr class="text-center" style="background-color:#D6EAF8">
+                <th scope="col">Type</th>
+                <th scope="col">Comment</th>
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in response["leaveHistory"] %}
+            <tr>
+                <td>{{item.vac_type}}</td>
+                <td>{{item.vac_comment}}</td>
+                <td>{{item.vac_startdate}}</td>
+                <td>{{item.vac_enddate}}</td>
+                <td>{{item.vac_status}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning" role="alert">
+        No leave history found.
+    </div>
+    {% endif %}
+    {% endif %}
+    {% endblock content %}

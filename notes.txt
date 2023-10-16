@@ -1,0 +1,32 @@
+Django vs NodeJS
+The security of the Django framework is better than that of Node. js because of the fact that it has a built-in system that protects it from any security failure. Node. js is less secure than the Django framework because it needs a manual operation in the system to administer security flaws.
+
+Projects vs. apps
+What’s the difference between a project and an app? An app is a web application that does something – e.g., a blog system, a database of public records or a small poll app. A project is a collection of configuration and apps for a particular website. A project can contain multiple apps. An app can be in multiple projects.
+
+engine:[//[user[:password]@][host]/[dbname]]
+engine -> postgresql
+user -> postgres (see `owner` field in previous screenshot)
+password -> password (my db password is the string, `password`)
+host -> localhost (because we are running locally on out machine)
+dbname -> flasksql (this is the name I gave to the db in the previous step)
+
+Flask Postgrtes Sample
+https://github.com/brenfrrs/flasksql/blob/master/app.py
+
+Flask-SQLAlchemy Class Relationship
+https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/#one-to-many-relationships
+
+SQLAlchemy
+https://docs.sqlalchemy.org/
+https://docs.sqlalchemy.org/en/14/tutorial/data.html
+https://chartio.com/resources/tutorials/how-to-execute-raw-sql-in-sqlalchemy/
+
+SQL Cheat Sheet
+https://learnxinyminutes.com/docs/sql/
+
+Python Modules
+https://docs.python.org/3/tutorial/modules.html
+
+Jinja2 Form Validation
+https://www.youtube.com/watch?v=ve-3ho66a_E

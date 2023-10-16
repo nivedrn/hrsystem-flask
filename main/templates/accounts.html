@@ -1,0 +1,327 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container-fluid px-5">
+    <h1 class="mb-4">Manage Accounts</h1>
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#accounts" id="manageAccounts"
+                onclick="toggleTab(event, 'Accounts');">Accounts</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#projects" id="manageProjects"
+                onclick="toggleTab(event, 'Projects');">Projects</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#projectassignments" id="manageProjectAssignments"
+                onclick="toggleTab(event, 'ProjectAssignments');fetchData('persons','#prjasgn_person_id');fetchData('projects','#prjasgn_project_id');">Project Assignments</a>
+        </li>
+    </ul>
+    {% if "messages" in response %}
+    {% if "ERROR" in response["messages"] %}
+    <div class="alert alert-warning mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% else %}
+    <div class="alert alert-success mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% endif %}
+    {% endif %}
+    <div id="Accounts" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="pt-2 bd-highlight">
+                <a href="#" id="addAccountsButton" onclick="toggleForm('AccountsForm');" style="float:right;"><button
+                        class="btn btn-outline-primary btn-sm" type="button">Add
+                        Accounts</button></a>
+            </div>
+            <div class="bd-highlight">
+                <div id="AccountsForm" class="AccountsForm">
+                    <div class="card containter-fluid mb-3">
+                        <div class="card-header">
+                            {{ response['action']|title if response['action'] != None else 'Add' }} Accounts
+                        </div>
+                        <form
+                            action="/accounts/records/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2 flex-grow-1 ">
+                                        <label for="acc_name">Name</label>
+                                        <input type="text" class="form-control" id="acc_name" name="acc_name"
+                                            value="{{response['formData']['acc_name']}}">
+                                    </div>
+                                    <div class="col-xs-4 flex-grow-1 ml-4">
+                                        <label for="acc_type">Type</label>
+                                        <select class="form-control" id="acc_type" name="acc_type">
+                                            <option>Customer</option>
+                                            <option>Consultant</option>
+                                            <option>Contractor</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4 flex-grow-1 ml-4">
+                                        <label for="acc_status">Status</label>
+                                        <select class="form-control" id="acc_status" name="acc_status"
+                                            value="{{response['formData']['acc_status']}}">
+                                            <option>ACTIVE</option>
+                                            <option>PENDING CONTRACT</option>
+                                            <option>CONTRACT EXPIRED</option>
+                                            <option>INACTIVE</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="addr_line">Address Line</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="addr_line" name="addr_line"
+                                                aria-describedby="inputGroupPrepend"
+                                                value="{{request.form['addr_line']}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label for="addr_city">City</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="addr_city" name="addr_city"
+                                                aria-describedby="inputGroupPrepend"
+                                                value="{{request.form['addr_city']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="addr_state">State</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="addr_state" name="addr_state"
+                                                aria-describedby="inputGroupPrepend"
+                                                value="{{request.form['addr_state']}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="addr_county">Country</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="addr_county" name="addr_county"
+                                                aria-describedby="inputGroupPrepend"
+                                                value="{{request.form['addr_county']}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <label for="validationCustomUsername">Postal Code</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="addr_zip" name="addr_zip"
+                                                aria-describedby="inputGroupPrepend"
+                                                value="{{request.form['addr_zip']}}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="account_id" name="account_id" value="{{response['key']}}" />
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <a href="#" id="cancelAccountsButton" onclick="toggleForm('AccountsForm');"
+                                    style="float:right;"><button class="btn btn-outline-danger"
+                                        type="button">Cancel</button></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if "accounts" in response and response["accounts"] != None %}
+        {% if response["accounts"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col" colspan="2" style="width:10%">Action</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Projects</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["accounts"] %}
+                <tr>
+                    <td class="text-center"><a href="/accounts/records/edit/{{item.id}}"><i
+                                class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                    </td>
+                    <td class="text-center"><a href="/accounts/records/delete/{{item.id}}"><i
+                                class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                    </td>
+                    <td>{{item.acc_name}}</td>
+                    <td>{{item.acc_type}}</td>
+                    <td>{{item.acc_status}}</td>
+                    <td>{{item.addr_line}}, {{item.addr_city}}, {{item.addr_state}}, {{item.addr_country}},
+                        {{item.addr_zip}}</td>
+                    <td>{{item.count}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No accounts found. Click on <a href="#" id="addAccountsButton"
+                onclick="toggleForm('AccountsForm');">"Add Accounts"</a> button to create accounts in the
+            system.
+        </p>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="Projects" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="pt-2 bd-highlight">
+                <a href="#" id="addProjectsButton"
+                    onclick="toggleForm('ProjectsForm');fetchData('accounts','#project_account_id');fetchData('managers','#project_manager_id');"
+                    style="float:right;"><button class="btn btn-outline-primary btn-sm" type="button">Add
+                        Projects</button></a>
+            </div>
+            <div class="bd-highlight">
+                <div id="ProjectsForm" class="ProjectsForm">
+                    <div class="card containter-fluid mb-3">
+                        <div class="card-header">
+                            {{ response['action']|title if response['action'] != None else 'Add' }} Projects
+                        </div>
+                        <form
+                            action="/accounts/projects/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2 flex-grow-1 ">
+                                        <label for="email">Account</label>
+                                        <select class="form-control" id="project_account_id" name="project_account_id">
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4 flex-grow-1 ml-4">
+                                        <label for="description">Description</label>
+                                        <input type="text" class="form-control" id="description" name="description"
+                                            value="{{response['formData']['description']}}">
+                                    </div>
+                                    <div class="col-xs-2 flex-grow-1 ml-4">
+                                        <label for="project_manager_id">Manager</label>
+                                        <select class="form-control" id="project_manager_id" name="project_manager_id">
+                                        </select>
+                                    </div>
+                                    <div class="col-xs-4  ml-4">
+                                        <label for="project_status">Status</label>
+                                        <select class="form-control" id="project_status" name="project_status"
+                                            value="{{response['formData']['project_status']}}">
+                                            <option>ACTIVE</option>
+                                            <option>PENDING CONTRACT</option>
+                                            <option>CONTRACT EXPIRED</option>
+                                            <option>ON HOLD</option>
+                                            <option>CLOSED</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="project_id" name="project_id" value="{{response['key']}}" />
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <a href="#" id="cancelProjectsButton" onclick="toggleForm('ProjectsForm');"
+                                    style="float:right;"><button class="btn btn-outline-danger"
+                                        type="button">Cancel</button></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if "projects" in response and response["projects"] != None %}
+        {% if response["projects"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col" colspan="2" style="width:10%">Action</th>
+                    <th scope="col">Account</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Manager</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Assigned Users</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["projects"] %}
+                <tr>
+                    <td class="text-center"><a href="/accounts/projects/edit/{{item.id}}"><i
+                                class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                    </td>
+                    <td class="text-center"><a href="/accounts/projects/delete/{{item.id}}"><i
+                                class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                    </td>
+                    <td>{{item.acc_name}}</td>
+                    <td>{{item.description}}</td>
+                    <td>
+                        {% if item.last_name != None %}
+                        {{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>{{item.project_status}}</td>
+                    <td>{{item.count}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No Projects found. Click on <a href="#" id="addAccountsButton"
+                onclick="toggleForm('ProjectsForm');fetchData('accounts','#project_account_id');">"Add Projects"</a>
+            button to create projects in the
+            system.
+        </p>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="ProjectAssignments" class="tabcontent">
+        <div class="d-flex flex-column bd-highlight">
+            {% include 'projectassignment.html' %}
+
+            {% if "projectassignments" in response and response["projectassignments"] != None %}
+            {% if response["projectassignments"].rowcount > 0 %}
+            <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+                <thead>
+                    <tr class="text-center" style="background-color:#D6EAF8">
+                        <th scope="col" colspan="2" style="width:10%">Action</th>
+                        <th scope="col">Project Description</th>
+                        <th scope="col">Project Status</th>
+                        <th scope="col">Assign To</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Assigned On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in response["projectassignments"] %}
+                    <tr>
+                        <td class="text-center"><a href="/accounts/projectassignments/edit/{{item.id}}"><i
+                                    class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                        </td>
+                        <td class="text-center"><a href="/accounts/projectassignments/delete/{{item.id}}"><i
+                                    class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                        </td>
+                        <td>{{item.description}}</td>
+                        <td>{{item.project_status}}</td>
+                        <td>
+                            {% if item.last_name != None %}
+                            {{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{item.role}}</td>
+                        <td>{{item.assigned_on}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted">No Project Assignments found.</p>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

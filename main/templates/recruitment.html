@@ -1,0 +1,181 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<div class="container-fluid px-5">
+    <h1 class="mb-4">Manage Recruitment</h1>
+
+    {% if "messages" in response %}
+    {% if "ERROR" in response["messages"] %}
+    <div class="alert alert-warning" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% else %}
+    <div class="alert alert-success" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if response["key"] != None and response["action"] == "read" %}
+    {% if response["table"] == "joblisting" %}
+    {% if "joblisting" in response and response["joblisting"] != None %}
+    <table class="table table-sm table-hover table-bordered shadow-sm text-center">
+        <thead>
+            <tr>
+                <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">Job Listing
+                        Details</span></th>
+            </tr>
+            <tr class="text-center" style="background-color:#D6EAF8">
+                <th scope="col">Job Title</th>
+                <th scope="col">Job Description</th>
+                <th scope="col">Job Experience</th>
+                <th scope="col">Job Role</th>
+                <th scope="col">Job Location</th>
+                <th scope="col">Status</th>
+        </thead>
+        <tbody>
+            {% for item in response["joblisting"] %}
+            <tr style="background-color:#FEFEFE">
+                <td>{{item.job_title}}</td>
+                <td>{{item.job_descr}}</td>
+                <td>{{item.job_exp}}</td>
+                <td>{{item.job_role}}</td>
+                <td>{{item.job_location}}</td>
+                <td>{{item.job_status}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% include 'candidate-applications.html' %}
+
+    {% else %}
+    {% include 'candidate.html' %}
+    {% endif %}
+
+    {% else %}
+    <div id="JobListing">
+        <div class="d-flex flex-column bd-highlight">
+            <div class="pt-2 bd-highlight">
+                <a href="#" id="addJobListingButton" onclick="toggleForm('JobListingForm');"
+                    style="float:right;"><button class="btn btn-outline-primary btn-sm" type="button">Add
+                        Job Listing</button></a>
+            </div>
+            <div class="bd-highlight">
+                <div id="JobListingForm" class="JobListingForm">
+                    <div class="card containter-fluid mb-3">
+                        <div class="card-header">
+                            {{ response["action"]|title if response["action"] != None else "Add" }} Job Listing
+                        </div>
+                        <form
+                            action="/recruitment/joblisting/{{ response['action'] if response['action'] != None else 'create' }}"
+                            method="POST" autocomplete="off">
+                            <div class="card-body">
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-2 flex-grow-1">
+                                        <label for="job_title">Job Title</label>
+                                        <input type="text" class="form-control" id="job_title" name="job_title"
+                                            type="text" value="{{response['formData']['job_title']}}">
+                                    </div>
+                                    <div class="col-xs-4 ml-4">
+                                        <label for="job_exp">Experience Required</label>
+                                        <input type="text" class="form-control" id="job_exp" name="job_exp" type="text"
+                                            value="{{response['formData']['job_exp']}}">
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-3 flex-grow-1">
+                                        <label for="job_descr">Job Description</label>
+                                        <textarea class="form-control" id="job_descr" name="job_descr" type="textarea"
+                                            rows="3">{{response['formData']['job_descr']}}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex flex-row justify-content-between mb-2">
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="job_role">Job Role</label>
+                                        <input class="form-control" id="job_role" name="job_role" type="text"
+                                            value="{{response['formData']['job_role']}}">
+                                    </div>
+                                    <div class="col-xs-3 flex-grow-1 mr-4">
+                                        <label for="job_location">Job Location</label>
+                                        <input class="form-control" id="job_location" name="job_location" type="text"
+                                            value="{{response['formData']['job_location']}}">
+                                    </div>
+                                    <div class="col-xs-3 flex-grow-1">
+                                        <label for="job_status">Listing Status</label>
+                                        <select class="form-control" id="job_status" name="job_status"
+                                            value="{{response['formData']['job_status']}}">
+                                            <option>OPEN</option>
+                                            <option>CLOSED</option>
+                                            <option>ON HOLD</option>
+                                            <option>INACTIVE</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="joblisting_id" name="joblisting_id" value="{{response['key']}}" />
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <a href="#" id="cancelJobListingButton" onclick="toggleForm('JobListingForm');"
+                                    style="float:right;"><button class="btn btn-outline-danger"
+                                        type="button">Cancel</button></a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if response["joblistings"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr>
+                    <th class="p-2 bg-white text-left" scope="col" colspan="11"><span class="align-middle pl-2">Job
+                            Listings</span></th>
+                </tr>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col" colspan="2" style="width:10%">Action</th>
+                    <th scope="col">Job Title</th>
+                    <th scope="col">Job Description</th>
+                    <th scope="col">Experience Required</th>
+                    <th scope="col">Job Role</th>
+                    <th scope="col">Job Location</th>
+                    <th scope="col">Listing Status</th>
+                    <th scope="col">Listing Date</th>
+                    <th scope="col">Number of Applicants</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["joblistings"] %}
+                <tr>
+                    <td class="text-center"><a href="/recruitment/joblisting/edit/{{item.id}}"><i
+                                class="fa-solid fa-edit fa-flip-horizontal "></i></a>
+                    </td>
+                    <td class="text-center"><a href="/recruitment/joblisting/delete/{{item.id}}"><i class="fa-solid fa-trash fa-flip-horizontal"></i></a>
+                    </td>
+                    <td><a href="/recruitment/joblisting/read/{{item.id}}">{{item.job_title}}</a></td>
+                    <td>{{item.job_descr}}</td>
+                    <td>{{item.job_exp}}</td>
+                    <td>{{item.job_role}}</td>
+                    <td>{{item.job_location}}</td>
+                    <td>{{item.job_status}}</td>
+                    <td>{{item.created_at}}</td>
+                    <td>{{item.count}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-muted">No job listings found. Click on <a href="#" id="addJobListingButton"
+                onclick="toggleForm('JobListingForm');">"Add Job Listing"</a> button to create a new listing in the
+            system"
+        </p>
+        {% endif %}
+
+        {% include 'candidate-applications.html' %}
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

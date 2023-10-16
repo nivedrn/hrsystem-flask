@@ -1,0 +1,114 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="container-fluid px-5">
+    <h1 class="mb-4">Dashboard</h1>
+
+    {% if "accounts" in response and response["accounts"] != None %}
+    {% if response["accounts"].rowcount > 0 %}
+    <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+        <thead>
+            <tr>
+                <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">New
+                        Accounts</span></th>
+            </tr>
+            <tr class="text-center" style="background-color:#D6EAF8">
+                <th scope="col">Name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+                <th scope="col">Address</th>
+                <th scope="col">Projects</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in response["accounts"] %}
+            <tr>
+                <td>{{item.acc_name}}</td>
+                <td>{{item.acc_type}}</td>
+                <td>{{item.acc_status}}</td>
+                <td>{{item.addr_line}}, {{item.addr_city}}, {{item.addr_state}}, {{item.addr_country}},
+                    {{item.addr_zip}}</td>
+                <td>{{item.count}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-muted">No accounts found.
+    </p>
+    {% endif %}
+    {% endif %}
+
+    {% if "projects" in response and response["projects"] != None %}
+    {% if response["projects"].rowcount > 0 %}
+    <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+        <thead>
+            <tr>
+                <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">New
+                        Projects</span></th>
+            </tr>
+            <tr class="text-center" style="background-color:#D6EAF8">
+                <th scope="col">Account</th>
+                <th scope="col">Description</th>
+                <th scope="col">Manager</th>
+                <th scope="col">Status</th>
+                <th scope="col">Assigned Users</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in response["projects"] %}
+            <tr>
+                <td>{{item.acc_name}}</td>
+                <td>{{item.description}}</td>
+                <td>
+                    {% if item.last_name != None %}
+                    {{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{{item.project_status}}</td>
+                <td>{{item.count}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-muted">No Projects found.
+    </p>
+    {% endif %}
+    {% endif %}
+
+    {% if "employees" in response and response["employees"] != None %}
+    {% if response["employees"].rowcount > 0 %}
+    <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+        <thead>
+            <tr>
+                <th class="p-2 bg-white text-left " scope="col" colspan="7"><span class="align-middle pl-2">New Joinees</span></th>
+            </tr>
+            <tr class="text-center" style="background-color:#D6EAF8">
+                <th scope="col">Username</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Profile</th>
+                <th scope="col">Tier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in response["employees"] %}
+            <tr>
+                <td><a href="/profile/employee/read/{{item.id}}">{{item.username}}</a></td>
+                <td>{{item.last_name}}{{ "," if item.first_name != "" else "" }} {{item.first_name}}</td>
+                <td>{{item.email}}</td>
+                <td>{{item.profile_name}}</td>
+                <td>{{item.tier_id}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-muted">No employees found. </p>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock content %}

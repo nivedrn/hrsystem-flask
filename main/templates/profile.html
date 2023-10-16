@@ -1,0 +1,221 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<div class="container-fluid px-5">
+
+    {% if response["key"] == "self" %}
+    <h1 class="mb-4">My Profile</h1>
+    {% else %}
+    <h1 class="mb-4">{{ response["table"]|title }}</h1>
+    {% endif %}
+
+    {% if "messages" in response %}
+    {% if "ERROR" in response["messages"] %}
+    <div class="alert alert-warning mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% else %}
+    <div class="alert alert-success mt-3" role="alert">
+        {{ response["messages"] }}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div id="MyDetails">
+        <div class="card containter-fluid mb-3 shadow-sm">
+            <div class="card-header">
+                {% if response["key"] == "self" %}
+                My Details
+                {% else %}
+                    {{ response["table"]|title }} Details      
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="form-group d-flex flex-row justify-content-left mb-2">
+                    <div class="col-xs-2">
+                        <label for="first_name">Name</label>
+                        <div>
+                            {{response["recDetails"]["last_name"]}}{{ "," if
+                            response["recDetails"]["first_name"] != "" else "" }}
+                            {{response["recDetails"]["first_name"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-3 ml-5 pl-5">
+                        <label for="first_name">Email</label>
+                        <div>
+                            {{response["recDetails"]["email"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Username</label>
+                        <div>
+                            {{response["recDetails"]["username"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Employee ID</label>
+                        <div>
+                            {{response["recDetails"]["employee_id"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Date of Birth</label>
+                        <div>
+                            {{response["recDetails"]["user_dob"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Tier</label>
+                        <div>
+                            {{response["recDetails"]["tier_id"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Address</label>
+                        <div>
+                            {{response["recDetails"]["addr_line"]}}, {{response["recDetails"]["addr_city"]}},
+                            {{response["recDetails"]["addr_state"]}},
+                            {{response["recDetails"]["addr_country"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">Phone Number</label>
+                        <div>
+                            {{response["recDetails"]["phone_number"]}}
+                        </div>
+                    </div>
+                </div>
+                {% if response["table"] == "employee" %}
+                <div class="form-group d-flex flex-row mb-2 pt-3"
+                    style="border-top:1px solid #cedcf8b0"> 
+                    <div class="col-xs-4">
+                        <label for="first_name">Manager</label>
+                        <div>
+                            {{response["recDetails"]["manager_id"]}}
+                        </div>
+                    </div>
+                    <div class="col-xs-4 ml-5 pl-5">
+                        <label for="first_name">No. of Vacations</label>
+                        <div>
+                            {{response["recDetails"]["num_vacations"]}}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div id="Projects">
+        {% if "projectassignments" in response and response["projectassignments"] != None %}
+        {% if response["projectassignments"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr>
+                    <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">Projects</span></th>
+                </tr>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col">Project Description</th>
+                    <th scope="col">Project Status</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Assigned On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["projectassignments"] %}
+                <tr>
+                    <td>{{item.description}}</td>
+                    <td>{{item.project_status}}</td>
+                    <td>{{item.role}}</td>
+                    <td>{{item.assigned_on}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            No Project Assignments found.
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    {% if response["key"] == "self" %}
+    <div id="MyPayroll">
+
+        {% if "mypayrolls" in response and response["mypayrolls"] != None %}
+        {% if response["mypayrolls"].rowcount > 0 %}
+
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr>
+                    <th class="p-2 bg-white text-left " scope="col" colspan="6"><span class="align-middle pl-2">My
+                            Payrolls</span></th>
+                </tr>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col">Period</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["mypayrolls"] %}
+                <tr>
+                    <td>{{item.proll_year}} / {{item.proll_month}}</td>
+                    <td>{{item.prdetail_type}}</td>
+                    <td>{{item.prdetail_status}}</td>
+                    <td>{{item.prdetail_amount}} EUR</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            No payroll details found.
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="ITResources">
+        {% if "itresources" in response and response["itresources"] != None %}
+        {% if response["itresources"].rowcount > 0 %}
+        <table class="table table-sm table-hover table-bordered shadow-sm text-center mt-2">
+            <thead>
+                <tr class="text-center" style="background-color:#D6EAF8">
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Assigned To</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in response["itresources"] %}
+                <tr>
+                    <td>{{item.resource_name}}</td>
+                    <td>{{item.resource_descr}}</td>
+                    <td>{{item.resource_type}}</td>
+                    <td>{{item.last_name}}, {{item.first_name}}</td>
+                    <td>{{item.resource_status}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            No IT resource assignments found.
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    <div class="bd-highlight">
+        <a type="button" role="button" href="/profile/employee/resign/self" class="btn btn btn-outline-primary btn-lg btn-block ">
+            <i class="fa-solid fa-door-open mr-3"></i>Resign
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

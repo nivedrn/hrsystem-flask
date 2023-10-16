@@ -1,0 +1,74 @@
+<div id="CandidateDetails">
+    <div class="d-flex flex-column bd-highlight">
+        <div class="bd-highlight">
+            <div id="CandidateResumeForm" class="CandidateResumeForm">
+                <div class="card containter-fluid mb-3 shadow-sm">
+                    <div class="card-header">
+                        Candidate Details
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group d-flex flex-row justify-content-left mb-2">
+                            <div class="col-xs-2">
+                                <label for="first_name">Name</label>
+                                <p>{{response["candidateDetails"]["salutation"]}}
+                                    {{response["candidateDetails"]["first_name"]}}
+                                    {{response["candidateDetails"]["last_name"]}}</p>
+                            </div>
+                            <div class="col-xs-3 ml-5 pl-5">
+                                <label for="first_name">Email</label>
+                                <p>{{response["candidateDetails"]["email"]}}</p>
+                            </div>
+                            <div class="col-xs-4 flex-grow-1 ml-5 pl-5">
+                                <label for="first_name">Resume Link</label>
+                                <a href="/recruitment/candidate/downloadresume/{{response['key']}}">
+                                    <p>{{response["candidateDetails"]["resume_filename"]}}</p>
+                                </a>
+                            </div>
+                            <div class="col-xs-4 mr-3">
+                                <label for="first_name">LinkedIn Username</label>
+                                <p>{{response["candidateDetails"]["linkedin_username"]}}</p>
+                            </div>
+                        </div>
+                        <div class="form-group d-flex flex-row justify-content-between mb-2 pt-3"
+                            style="border-top:1px solid #cedcf8b0">
+                            <div class="col-xs-3 mr-4">
+                                <label for="first_name">Highest Education</label>
+                                <div>{{response["candidateDetails"]["edu_hightest"]}}</div>
+                            </div>
+                            <div class="col-xs-3 flex-grow-1  pl-5 mr-4">
+                                <label for="first_name">Institution</label>
+                                <div>{{response["candidateDetails"]["edu_hightest_institution"]}}</div>
+                            </div>
+                            <div class="col-xs-3 mr-4">
+                                <label for="first_name">Year</label>
+                                <div>{{response["candidateDetails"]["edu_hightest_year"]}}</div>
+                            </div>
+                            <div class="col-xs-3 mr-4">
+                                <label for="first_name">Grade</label>
+                                <div>{{response["candidateDetails"]["edu_hightest_grade"]}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include 'candidate-applications.html' %}
+        <div class="bd-highlight">
+            <div id="CandidateResumeForm" class="CandidateResumeForm">
+                <div class="card containter-fluid mb-3 shadow-sm">
+                    <div class="card-header">
+                        Resume
+                    </div>
+                    <div class="card-body p-0">
+                        <!--<embed src="/recruitment/candidate/resume/{{response['key']}}" width="100%" height="600"
+                            type="application/pdf">-->
+                        <iframe src="/recruitment/candidate/resume/{{response['key']}}" height="850"
+                            width="100%"></iframe>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

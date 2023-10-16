@@ -1,0 +1,35 @@
+<div class="card containter-fluid mb-3">
+    <div class="card-header">
+        {{ response['action']|title if response['action'] != None else 'Add' }} Project Assignments
+    </div>
+    <form action="/accounts/projectassignments/{{ response['action'] if response['action'] != None else 'create' }}"
+        method="POST" autocomplete="off">
+        <div class="card-body">
+            <div class="form-group d-flex flex-row justify-content-between mb-2">
+                <div class="col-xs-3 flex-grow-1 mr-4">
+                    <label for="prjasgn_project_id">Project</label>
+                    <select class="form-control" id="prjasgn_project_id" name="prjasgn_project_id"
+                        onfocus="fetchData('projects','#prjasgn_project_id');">
+                    </select>
+                </div>
+                <div class="col-xs-3 flex-grow-1 mr-4">
+                    <label for="prjasgn_person_id">Employee</label>
+                    <select class="form-control" id="prjasgn_person_id" name="prjasgn_person_id"
+                        onfocus="fetchData('persons','#prjasgn_person_id');">
+                    </select>
+                </div>
+                <div class="col-xs-2 ">
+                    <label for="role">Role</label>
+                    <input type="text" class="form-control" id="role" name="role"
+                        value="{{response['formData']['role']}}" >
+                </div>
+            </div>
+            <input type="hidden" id="prjasgn_id" name="prjasgn_id" value="{{response['formData']['prjasgn_id']}}" />
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href="#" id="cancelITResourcesFormButton" onclick="toggleForm('ITResourcesForm');"
+                style="float:right;"><button class="btn btn-outline-danger" type="button">Cancel</button></a>
+        </div>
+    </form>
+</div>
