@@ -22,6 +22,10 @@ def beforeRequest():
         global db
         if db == None:
             db = DatabaseConnect(AppConfig.SQLALCHEMY_DATABASE_URI)
+
+        if db.engine == None and request.path != "/unauthorized":
+            return redirect(url_for('unauthorized'))
+            
         if 'userSession' in session:        
             hasViewAccess = utils.validateUserAccess(db, session['userSession']["username"], request.path) 
         else:
@@ -51,11 +55,11 @@ def home():
 @app.route("/login", methods=['GET','POST'])
 def login():
     response = { 'table' : 'login'}
-    if request.method == 'POST':
-        global db
-        if db == None:
-            db = DatabaseConnect(AppConfig.SQLALCHEMY_DATABASE_URI)
-        
+    global db
+    if db == None:
+        db = DatabaseConnect(AppConfig.SQLALCHEMY_DATABASE_URI)
+
+    if request.method == 'POST':        
         result = users.Person().validatePerson(db, request.form['username'], request.form['password'] )
         returnUrl = request.args.get('returnUrl') if 'returnUrl' in request.args else "/"
         if result != None and "ERROR" not in result:
@@ -66,6 +70,10 @@ def login():
             response["messages"] = result
             if returnUrl == '/jobs/myapplication':
                 return redirect('/jobs/myapplication?msg=' + response["messages"])
+   
+    if db.engine == None:
+        response["messages"] = "ERROR : Database Connection Failed"
+
     return render_template("login.html", response=response)
 
 @app.route('/logout')

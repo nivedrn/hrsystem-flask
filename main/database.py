@@ -12,8 +12,11 @@ class DatabaseConnect():
         self.dbURI = dbURI
 
     def initiateEngine(self):        
-        self.engine = create_engine(self.dbURI, echo=True)
-        return self.engine
+        try:
+            self.engine = create_engine(self.dbURI, echo=True)
+            return self.engine
+        except:
+            return None
 
     def initiateConnection(self):        
         if self.engine == None:
