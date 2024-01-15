@@ -29,3 +29,8 @@
 
 ### Screenshots
 <img align="center" style="padding-top:5px;" src="images/loginPage.png"/>
+<img align="center" style="padding-top:5px;" src="images/adminPage.png"/>
+<img align="center" style="padding-top:5px;" src="images/jobListingPage.png"/>
+<img align="center" style="padding-top:5px;" src="images/candidateSignUpPage.png"/>
+<img align="center" style="padding-top:5px;" src="images/projectsPage.png"/>
+<img align="center" style="padding-top:5px;" src="images/employeeDailyStatusPage.png"/>

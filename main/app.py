@@ -23,7 +23,8 @@ def beforeRequest():
         if db == None:
             db = DatabaseConnect(AppConfig.SQLALCHEMY_DATABASE_URI)
 
-        if db.engine == None and request.path != "/unauthorized":
+        if db.engine == None and request.path != "/unauthorized" and request.path != "/dropDatabase" and request.path != "/createDatabase":
+            print("teststst")
             return redirect(url_for('unauthorized'))
             
         if 'userSession' in session:        

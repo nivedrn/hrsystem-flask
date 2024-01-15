@@ -15,7 +15,8 @@ class DatabaseConnect():
         try:
             self.engine = create_engine(self.dbURI, echo=True)
             return self.engine
-        except:
+        except Exception as e:
+            print(e)
             return None
 
     def initiateConnection(self):        
